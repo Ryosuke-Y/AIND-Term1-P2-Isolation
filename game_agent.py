@@ -43,7 +43,14 @@ def custom_score(game, player):
 
     myMoves = len(game.get_legal_moves(player))
     oppMoves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(myMoves - 3 * oppMoves)
+    spaces = float(len(game.get_blank_spaces()))
+    total_cells = (game.width * game.height)
+    open_pct = spaces / total_cells
+
+    if open_pct > 0.5:
+        return float((0.5*myMoves - oppMoves))
+    else:
+        return float((myMoves - 0.5 * oppMoves))
 
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -70,7 +77,8 @@ def custom_score_2(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    myMoves = len(game.get_legal_moves(player))
+    return float(myMoves)
 
 
 def custom_score_3(game, player):
@@ -96,7 +104,8 @@ def custom_score_3(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    oppMoves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float( - oppMoves)
 
 
 class IsolationPlayer:
