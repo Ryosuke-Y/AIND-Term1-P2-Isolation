@@ -228,15 +228,15 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
-        moves = game.get_legal_moves()
-        if depth == 0 or not moves:
+        legal_moves = game.get_legal_moves()
+        if depth == 0 or not legal_moves:
             return -1, -1
 
-        best_move = moves[0]
+        best_move = legal_moves[0]
         best_score = float('-inf')
-        for move in moves:
-            clone = game.forecast_move(move)
-            score = self.min_play(clone, depth)
+        for move in legal_moves:
+            next_state = game.forecast_move(move)
+            score = self.min_play(next_state, depth)
             if score > best_score:
                 best_move = move
                 best_score = score
@@ -245,13 +245,13 @@ class MinimaxPlayer(IsolationPlayer):
     def min_play(self, game, depth):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-        moves = game.get_legal_moves()
-        if depth == 1 or not moves:
+        legal_moves = game.get_legal_moves()
+        if depth == 1 or not legal_moves:
             return self.score(game, self)
         best_score = float('inf')
-        for move in moves:
-            clone = game.forecast_move(move)
-            score = self.max_play(clone, depth - 1)
+        for move in legal_moves:
+            next_state = game.forecast_move(move)
+            score = self.max_play(next_state, depth - 1)
             if score < best_score:
                 best_score = score
         return best_score
@@ -259,13 +259,14 @@ class MinimaxPlayer(IsolationPlayer):
     def max_play(self, game, depth):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-        moves = game.get_legal_moves()
+
+        legal_moves = game.get_legal_moves()
         if depth == 1 or not moves:
             return self.score(game, self)
         best_score = float('-inf')
-        for move in moves:
-            clone = game.forecast_move(move)
-            score = self.min_play(clone, depth - 1)
+        for move in legal_moves:
+            next_state = game.forecast_move(move)
+            score = self.min_play(next_state, depth - 1)
             if score > best_score:
                 best_score = score
         return best_score
@@ -305,35 +306,17 @@ class AlphaBetaPlayer(IsolationPlayer):
         self.time_left = time_left
 
         # TODO: finish this function!
-        if len(legal_moves) > 0:
-            best_move = legal_moves[0]
-        else:
-            best_move = (-1, -1)
-
-        best_result = float("-inf")
-        depth = 0
+        best_move = (-1, -1)
 
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
-            if self.iterative:
-                depth = 1
-
-                while True:
-                    if self.method == 'minimax':
-                        score, moves = self.minimax(game, depth)
-                    else:
-                        score, moves = self.alphabeta(game, depth)
-                    depth += 1
-
-            else:
-                if self.method == 'minimax':
-                    score, moves = self.minimax(game, self.search_depth)
-                else:
-                    score, moves = self.alphabeta(game, self.search_depth)
-
+            depth = 1
+            while self.time_left() > self.TIMER_THRESHOLD:
+                best_move = self.alphabeta(game, depth, alpha=float("-inf"), beta=float("inf"))
+                depth = depth + 1
         except SearchTimeout:
-            pass  # Handle any actions required after timeout as needed
+            return best_move
 
         # Return the best move from the last completed search iteration
         return best_move
