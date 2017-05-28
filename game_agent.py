@@ -43,7 +43,7 @@ def custom_score(game, player):
 
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - opp_moves)
+    return float(own_moves - 2*opp_moves)
 
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -76,9 +76,14 @@ def custom_score_2(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - opp_moves)
+    w, h = game.width / 2., game.height / 2.
+    y, x = game.get_player_location(player)
+    own_moves_from_center = float((h - y)**2 + (w - x)**2)
+
+    a, b = game.get_player_location(game.get_opponent(player))
+    opp_moves_from_center = float((h - a)**2 + (w - b)**2)
+
+    return float(opp_moves_from_center - own_moves_from_center)
 
 
 def custom_score_3(game, player):
@@ -110,10 +115,19 @@ def custom_score_3(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - opp_moves)
+    own_moves = game.get_legal_moves(player)
+    opp_position = game.get_player_location(game.get_opponent(player))
+    mid_width = float(game.width / 2)
+    mid_height = float(game.height / 2)
 
+    score = 0
+
+    for move in own_moves :
+        score = score + (move[0] - opp_position[0])**2 + (move[1] - opp_position[1])**2
+
+    score = 1 / max(score,100)
+
+    return score
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
